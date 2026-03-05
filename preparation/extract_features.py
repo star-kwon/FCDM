@@ -3,7 +3,7 @@ Code adapted from https://github.com/chuanyangjin/fast-DiT
 """
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../train_eqvae'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../train_gen'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 import torch
@@ -20,30 +20,9 @@ from collections import OrderedDict
 from PIL import Image
 import argparse
 import logging
-from models.diffusion import create_diffusion
 from diffusers.models import AutoencoderKL
 from tqdm import tqdm
 
-from train_eqvae.ldm.models.autoencoder import AutoencoderKL as LDMAutoencoderKL
-from ldm.util import instantiate_from_config
-import yaml
-from omegaconf import OmegaConf
-
-def load_config(config_path, display=False):
-    config = OmegaConf.load(config_path)
-    if display:
-        print(yaml.dump(OmegaConf.to_container(config)))
-    return config
-
-
-def load_kl(config, ckpt_path=None):
-
-    model = LDMAutoencoderKL(**config.model.params)
-
-    if ckpt_path is not None:
-        sd = torch.load(ckpt_path, map_location="cpu")["state_dict"]
-    missing, unexpected = model.load_state_dict(sd, strict=False)
-    return model.eval()
 
 def preprocess_kl(x):
     x = 2.*x - 1.
@@ -202,7 +181,7 @@ def main(args):
         train_steps += 1
 
 if __name__ == "__main__":
-    # Default args here will train ACD-XL with the hyperparameters we used in our paper (except training iters).
+    # Default args here will train FCDM-XL with the hyperparameters we used in our paper (except training iters).
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-path", type=str, required=True)
     parser.add_argument("--features-path", type=str, default="features")
@@ -213,7 +192,7 @@ if __name__ == "__main__":
     parser.add_argument("--global-batch-size", type=int, default=256)
     parser.add_argument("--global-seed", type=int, default=0)
     parser.add_argument("--vae", type=str, choices=["ema", "mse", "xl", "sd3","ours"], default="ema") 
-    parser.add_argument("--hf-model-name", type=str, default="zelaki/eq-vae")
+    parser.add_argument("--hf-model-name", type=str, default="stabilityai/sd-vae-ft-ema")
     parser.add_argument("--hf-model-dir", type=str, default=None)
     parser.add_argument("--vae-scaling-factor", type=float, default=0.18215)  
     parser.add_argument("--num-workers", type=int, default=4)

@@ -1,4 +1,4 @@
-name: ACD
+name: fcdm
 channels:
   - pytorch
   - nvidia

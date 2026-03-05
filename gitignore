@@ -1,5 +1,4 @@
 *__pycache__/
 .vscode/
-*.txt
 *.npy
 *.pt

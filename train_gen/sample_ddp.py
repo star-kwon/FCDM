@@ -4,14 +4,13 @@ Code adapted from https://github.com/chuanyangjin/fast-DiT
 """
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../train_eqvae'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../train_gen'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 
 import torch
 import torch.distributed as dist
-# from download import find_model
-from models.acd_models import ACD_models
+from models.fcdm_models import FCDM_models
 from models.diffusion import create_diffusion
 from diffusers.models import AutoencoderKL
 from tqdm import tqdm
@@ -81,11 +80,11 @@ def main(args):
 
     # Load model:
     latent_size = args.image_size // 8
-    model = ACD_models[args.model](
+    model = FCDM_models[args.model](
         num_classes=args.num_classes,
         in_channels=args.in_channels
     ).to(device)
-    # Auto-download a pre-trained model or load a custom ACD checkpoint from train.py:
+    # Load a pre-trained checkpoint:
     ckpt = torch.load(args.ckpt, map_location="cpu")
     model.load_state_dict(ckpt["ema"])
     model.eval()  # important!
@@ -193,12 +192,12 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, choices=list(ACD_models.keys()), default="ACD-XL")
+    parser.add_argument("--model", type=str, choices=list(FCDM_models.keys()), default="FCDM-XL")
     parser.add_argument("--vae-ckpt",  type=str,  default=None)
     parser.add_argument("--sample-dir", type=str, default="samples")
     parser.add_argument("--ddpm", type=bool, default=False)
     parser.add_argument("--vae-scaling-factor", type=float, default=0.18215)
-    parser.add_argument("--hf-model-name", type=str, default="zelaki/eq-vae")
+    parser.add_argument("--hf-model-name", type=str, default="stabilityai/sd-vae-ft-ema")
     parser.add_argument("--hf-model-dir", type=str, default=None)
     parser.add_argument("--in-channels", type=int, default=4)
     parser.add_argument("--image-size", type=int, choices=[256, 512], default=256)
@@ -210,7 +209,7 @@ if __name__ == "__main__":
     parser.add_argument("--tf32", action=argparse.BooleanOptionalAction, default=True,
                         help="By default, use TF32 matmuls. This massively accelerates sampling on Ampere GPUs.")
     parser.add_argument("--ckpt", type=str, default=None,
-                        help="Optional path to a ACD checkpoint.")
+                        help="Optional path to a FCDM checkpoint.")
     parser.add_argument("--per_proc_batch_size", "--per-proc-batch-size", type=int, default=64,
                         help="Number of samples to generate *per* GPU/process in each forward pass.")
     args = parser.parse_args()

@@ -24,7 +24,7 @@ from time import time
 import argparse
 import logging
 from accelerate import Accelerator
-from models.acd_models import ACD_models
+from models.fcdm_models import FCDM_models
 
 from diffusers.models import AutoencoderKL
 from torchvision.utils import save_image
@@ -148,7 +148,7 @@ def custom_to_pil(x):
 
 def main(args):
     """
-    Trains a new ACD model.
+    Trains a new FCDM model.
     """
     assert torch.cuda.is_available(), "Training currently requires at least one GPU."
 
@@ -157,7 +157,7 @@ def main(args):
     device = accelerator.device
 
     experiment_index = len(glob(f"{args.results_dir}/*"))
-    model_string_name = args.model.replace("/", "-")  # e.g., ACD-XL/2 --> ACD-XL-2 (for naming folders)
+    model_string_name = args.model.replace("/", "-")  # e.g., FCDM-XL/2 --> FCDM-XL-2 (for naming folders)
 
     experiment_dir = f"{args.results_dir}/{experiment_index:03d}-{model_string_name}"  # Create an experiment folder
 
@@ -179,11 +179,11 @@ def main(args):
     # Create model:
     assert args.image_size % 8 == 0, "Image size must be divisible by 8 (for the VAE encoder)."
     latent_size = args.image_size // 8
-    model = ACD_models[args.model](
+    model = FCDM_models[args.model](
         in_channels=args.in_channels,
         learn_sigma=False
     )
-    # Note that parameter initialization is done within the ACD constructor
+    # Note that parameter initialization is done within the FCDM constructor
     model = model.to(device)
     ema = deepcopy(model).to(device)  # Create an EMA of the model for use after training
 
@@ -290,7 +290,7 @@ def main(args):
                 log_steps = 0
                 start_time = time()
 
-            # Save ACD checkpoint:
+            # Save FCDM checkpoint:
             if train_steps % args.ckpt_every == 0:
                 if accelerator.is_main_process:
                     # Save checkpoint
@@ -347,7 +347,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # Default args here will train ACD-XL with the hyperparameters we used in our paper (except training iters).
+    # Default args here will train FCDM-XL with the hyperparameters we used in our paper (except training iters).
     parser = argparse.ArgumentParser()
     parser.add_argument("--feature-path", type=str, default="features")
     parser.add_argument("--label-path", type=str, default="labels")
@@ -356,14 +356,14 @@ if __name__ == "__main__":
     parser.add_argument("--in-channels", type=int, default=4)
     parser.add_argument("--ckpt", type=str, default=None)
     parser.add_argument("--max-train-steps", type=str, default=1_000_000)
-    parser.add_argument("--model", type=str, choices=list(ACD_models.keys()), default="ACD-XL")
+    parser.add_argument("--model", type=str, choices=list(FCDM_models.keys()), default="FCDM-XL")
     parser.add_argument("--image-size", type=int, choices=[256, 512], default=256)
     parser.add_argument("--num-classes", type=int, default=1000)
     parser.add_argument("--epochs", type=int, default=1400)
     parser.add_argument("--global-batch-size", type=int, default=256)
     parser.add_argument("--global-seed", type=int, default=0)
     parser.add_argument("--vae-name", type=str, default="ema")  # Choice doesn't affect training
-    parser.add_argument("--hf-model-name", type=str, default="zelaki/eq-vae")
+    parser.add_argument("--hf-model-name", type=str, default="stabilityai/sd-vae-ft-ema")
     parser.add_argument("--hf-model-dir", type=str, default=None)
     parser.add_argument("--vae-scaling-factor", type=float, default=0.18215)
     parser.add_argument("--cfg-scale", type=float, default=4.0)

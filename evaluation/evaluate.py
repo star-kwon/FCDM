@@ -3,7 +3,7 @@ Code adapted from https://github.com/chuanyangjin/fast-DiT
 """
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../train_eqvae'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../train_gen'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 from tqdm import tqdm
@@ -54,8 +54,8 @@ if __name__ == "__main__":
     parser.add_argument("--sample-dir", type=str, default="samples")
     parser.add_argument("--vae-scaling-factor", type=float, default=0.18215)
     parser.add_argument("--ref-batch", type=str, default="VIRTUAL_imagenet256_labeled.npz")
-    parser.add_argument("--sample-batch", type=str, default="zelaki/eq-vae")
-    parser.add_argument("--hf-model-name", type=str, default="zelaki/eq-vae")
+    parser.add_argument("--sample-batch", type=str, default="stabilityai/sd-vae-ft-ema")
+    parser.add_argument("--hf-model-name", type=str, default="stabilityai/sd-vae-ft-ema")
     parser.add_argument("--wavelets", type=str, default=False)
     parser.add_argument("--diff-proj", type=str, default=False)
     parser.add_argument("--gaussian-registers", type=str, default=False)
@@ -69,6 +69,6 @@ if __name__ == "__main__":
     parser.add_argument("--tf32", action=argparse.BooleanOptionalAction, default=True,
                         help="By default, use TF32 matmuls. This massively accelerates sampling on Ampere GPUs.")
     parser.add_argument("--output_fid", type=str, default=None,
-                        help="Optional path to a DiT checkpoint (default: auto-download a pre-trained DiT-XL/2 model).")
+                        help="Optional path to a FCDM checkpoint.")
     args = parser.parse_args()
     main(args)

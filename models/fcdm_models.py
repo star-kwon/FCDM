@@ -1,10 +1,7 @@
 import torch
 import torch.nn as nn
-import numpy as np
 import math
-# from timm.models.vision_transformer import PatchEmbed, Attention, Mlp
 import torch.nn.functional as F
-from typing import Union, Tuple, Optional
 
 class LayerNorm2d(nn.LayerNorm):
     def __init__(self, num_channels, eps=1e-6, affine=True):
@@ -192,9 +189,9 @@ class Upsample(nn.Module):
         return self.conv(x)
 
 
-class ACD(nn.Module):
+class FCDM(nn.Module):
     """
-    Diffusion UNet model with a convnext backbone.
+    Fully Convolutional Diffusion Models.
     """
     def __init__(
         self,
@@ -313,18 +310,18 @@ class ACD(nn.Module):
         t: (N,) tensor of diffusion timesteps
         y: (N,) tensor of class labels
         """
-        x_emb = self.x_embedder(x)               # (N, C, H, W)
-        t1 = self.t_embedder_1(t)    # (N, C, 1, 1)
-        y1 = self.y_embedder_1(y, self.training)    # (N, C, 1, 1)
-        c1 = t1 + y1                                # (N, D, 1, 1)
+        x_emb = self.x_embedder(x)
+        t1 = self.t_embedder_1(t)
+        y1 = self.y_embedder_1(y, self.training)
+        c1 = t1 + y1
 
-        t2 = self.t_embedder_2(t)    # (N, C, 1, 1)
-        y2 = self.y_embedder_2(y, self.training)    # (N, C, 1, 1)
-        c2 = t2 + y2                                # (N, D, 1, 1)
+        t2 = self.t_embedder_2(t)
+        y2 = self.y_embedder_2(y, self.training)
+        c2 = t2 + y2
 
-        t3 = self.t_embedder_3(t)    # (N, C, 1, 1)
-        y3 = self.y_embedder_3(y, self.training)    # (N, C, 1, 1)
-        c3 = t3 + y3                                # (N, D, 1, 1)
+        t3 = self.t_embedder_3(t)
+        y3 = self.y_embedder_3(y, self.training)
+        c3 = t3 + y3
 
         # encoder_1
         out_enc_level1 = x_emb
@@ -382,24 +379,24 @@ class ACD(nn.Module):
         return torch.cat([eps, rest], dim=1)
 
 #################################################################################
-#                   ACD (All Convolutional Diffusion) Configs                   #
+#             FCDM (Fully Convolutional Diffusion Models) Configs               #
 #################################################################################
 
-def ACD_S(**kwargs):
-    return ACD(hidden_size=128, depth=[2,4,8,4,2], **kwargs)
+def FCDM_S(**kwargs):
+    return FCDM(hidden_size=128, depth=[2,4,8,4,2], **kwargs)
 
-def ACD_B(**kwargs):
-    return ACD(hidden_size=256, depth=[2,4,8,4,2], **kwargs)
+def FCDM_B(**kwargs):
+    return FCDM(hidden_size=256, depth=[2,4,8,4,2], **kwargs)
 
-def ACD_L(**kwargs):
-    return ACD(hidden_size=512, depth=[2,4,8,4,2], **kwargs)
+def FCDM_L(**kwargs):
+    return FCDM(hidden_size=512, depth=[2,4,8,4,2], **kwargs)
 
-def ACD_XL(**kwargs):
-    return ACD(hidden_size=512, depth=[3,6,12,6,3], **kwargs)
+def FCDM_XL(**kwargs):
+    return FCDM(hidden_size=512, depth=[3,6,12,6,3], **kwargs)
 
-ACD_models = {
-    'ACD-S': ACD_S,
-    'ACD-B': ACD_B,
-    'ACD-L': ACD_L,
-    'ACD-XL': ACD_XL
+FCDM_models = {
+    'FCDM-S': FCDM_S,
+    'FCDM-B': FCDM_B,
+    'FCDM-L': FCDM_L,
+    'FCDM-XL': FCDM_XL
 }
