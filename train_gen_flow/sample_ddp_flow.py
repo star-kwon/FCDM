@@ -22,7 +22,7 @@ import argparse
 import yaml
 from omegaconf import OmegaConf
 
-from transport import create_transport, Sampler
+from flow_matching import create_transport, Sampler
 from train_utils import parse_sde_args, parse_transport_args
 
 from pathlib import Path
@@ -177,7 +177,7 @@ def main(args):
         if using_cfg:
             samples, _ = samples.chunk(2, dim=0)  # Remove null class samples
 
-        samples = vae.decode(samples / 0.18215).sample
+        # samples = vae.decode(samples / 0.18215).sample
 
         if args.vae_ckpt is not None:
             samples = vae.decode(samples / args.vae_scaling_factor)
