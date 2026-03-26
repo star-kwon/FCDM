@@ -106,7 +106,7 @@ Before running evaluation, download the reference `.npz` file from [ADM's Tensor
 
 Run the evaluation:
   ```bash
-  python train_gen/evaluate.py \
+  python evaluation/evaluate.py \
     --num-fid-samples 50000 \
     --sample-dir samples \
     --sample-batch /path/to/sample/sample.npz \
